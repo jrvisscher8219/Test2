@@ -1,13 +1,16 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Navigation from './components/Navigation'
-import Dashboard from './components/Dashboard'
-import TheorySection from './components/TheorySection'
-import PracticeSection from './components/PracticeSection'
-import ExamSection from './components/ExamSection'
-import ProgressTracker from './components/ProgressTracker'
-import AITutor from './components/AITutor'
+import dynamic from 'next/dynamic'
+
+// Dynamically import components to avoid SSR issues
+const Navigation = dynamic(() => import('./components/Navigation'), { ssr: false })
+const Dashboard = dynamic(() => import('./components/Dashboard'), { ssr: false })
+const TheorySection = dynamic(() => import('./components/TheorySection'), { ssr: false })
+const PracticeSection = dynamic(() => import('./components/PracticeSection'), { ssr: false })
+const ExamSection = dynamic(() => import('./components/ExamSection'), { ssr: false })
+const ProgressTracker = dynamic(() => import('./components/ProgressTracker'), { ssr: false })
+const AITutor = dynamic(() => import('./components/AITutor'), { ssr: false })
 
 export default function Home() {
   const [activeSection, setActiveSection] = useState('dashboard')
@@ -20,6 +23,8 @@ export default function Home() {
   }, [])
 
   const renderActiveSection = () => {
+    if (!mounted) return null
+    
     switch (activeSection) {
       case 'dashboard':
         return <Dashboard selectedLevel={selectedLevel} />
@@ -41,7 +46,7 @@ export default function Home() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Laden...</p>
         </div>
       </div>
@@ -56,7 +61,7 @@ export default function Home() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-sm">BE</span>
                 </div>
                 <h1 className="text-xl font-bold text-gray-900">
@@ -71,7 +76,7 @@ export default function Home() {
               <select
                 value={selectedLevel}
                 onChange={(e) => setSelectedLevel(e.target.value as 'havo4' | 'havo5')}
-                className="border border-gray-300 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="border border-gray-300 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="havo4">HAVO 4</option>
                 <option value="havo5">HAVO 5</option>
@@ -83,10 +88,12 @@ export default function Home() {
 
       <div className="flex">
         {/* Sidebar Navigation */}
-        <Navigation 
-          activeSection={activeSection} 
-          setActiveSection={setActiveSection} 
-        />
+        {mounted && (
+          <Navigation 
+            activeSection={activeSection} 
+            setActiveSection={setActiveSection} 
+          />
+        )}
 
         {/* Main Content */}
         <main className="flex-1 p-6">
@@ -96,7 +103,7 @@ export default function Home() {
         </main>
 
         {/* AI Tutor Sidebar */}
-        <AITutor selectedLevel={selectedLevel} />
+        {mounted && <AITutor selectedLevel={selectedLevel} />}
       </div>
     </div>
   )
